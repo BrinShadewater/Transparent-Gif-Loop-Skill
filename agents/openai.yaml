@@ -1,0 +1,4 @@
+interface:
+  display_name: "Transparent GIF Loop"
+  short_description: "Clean and smooth looping GIF assets"
+  default_prompt: "Use $transparent-gif-loop to turn a GIF into a transparent looping web asset."
