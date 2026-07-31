@@ -3,8 +3,7 @@
 Agent-neutral. Claude and Codex both read this file; `CLAUDE.md` points here.
 
 A **utility, not an asset folder** — an earlier vault note was unsure and it caused confusion.
-Python 3 + Pillow, single script. Repo: `github.com/BrinShadewater/Transparent-Gif-Loop-Skill`
-(private).
+Python 3 + Pillow, single script. Repo: `github.com/BrinShadewater/Transparent-Gif-Loop-Skill` (public, MIT).
 
 It solves one specific problem: a spinning 3D render or sticker exported onto black that snaps
 visibly at the loop point and plays too fast.

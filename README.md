@@ -4,7 +4,25 @@ Takes an animated GIF with a matte-black background and gives you back a clean, 
 
 Built for the specific and very common problem of a spinning 3D render, sticker, or reaction GIF that was exported onto black, snaps visibly at the loop seam, and plays about 40% too fast for comfort.
 
-> **Private working copy** — source behind the `transparent-gif-loop` skill.
+## 📦 Install
+
+**As an agent skill** (Claude Code, Codex) — clone it into your skills directory so the
+agent picks up `SKILL.md`:
+
+```shell
+git clone https://github.com/BrinShadewater/Transparent-Gif-Loop-Skill ~/.claude/skills/transparent-gif-loop
+```
+
+Codex users: swap `~/.claude/skills` for `~/.codex/skills`.
+
+**Standalone** — it is a single Python script, no agent required:
+
+```shell
+git clone https://github.com/BrinShadewater/Transparent-Gif-Loop-Skill
+cd Transparent-Gif-Loop-Skill
+python -m pip install Pillow
+python scripts/process_gif.py --help
+```
 
 ## ⚙️ Requirements
 
