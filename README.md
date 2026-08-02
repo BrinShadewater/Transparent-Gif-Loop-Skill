@@ -1,5 +1,7 @@
 # Transparent Gif Loop 🎞️
 
+![Licence](https://img.shields.io/badge/licence-MIT-blue?style=flat-square) ![Python](https://img.shields.io/badge/python-3.11%2B-3776ab?style=flat-square) ![Claude Skill](https://img.shields.io/badge/Claude-skill-d97757?style=flat-square) ![Shadewater Labs](https://img.shields.io/badge/Shadewater%20Labs-%E2%9A%97%EF%B8%8F-6b4fa2?style=flat-square)
+
 Takes an animated GIF with a matte-black background and gives you back a clean, transparent, properly-looping WebP.
 
 Built for the specific and very common problem of a spinning 3D render, sticker, or reaction GIF that was exported onto black, snaps visibly at the loop seam, and plays about 40% too fast for comfort.
