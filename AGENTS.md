@@ -1,6 +1,7 @@
 # Transparent Gif Loop — Agent Guide
 
-Agent-neutral. Claude and Codex both read this file; `CLAUDE.md` points here.
+Agent-neutral. Tools that read `AGENTS.md` load this file natively; Claude Code loads
+it through the `@`-import in `CLAUDE.md` beside it. Edit here, keep it agent-neutral.
 
 A **utility, not an asset folder** — an earlier vault note was unsure and it caused confusion.
 Python 3 + Pillow, single script. Repo: `github.com/BrinShadewater/Transparent-Gif-Loop-Skill` (public, MIT).
@@ -30,16 +31,11 @@ footage that does not loop.
 
 ## This repo is the source for an installed skill
 
-The `transparent-gif-loop` skill derives from this project and is **served to Claude from a
-plugin**, existing on disk only under `~\.codex\skills`. Do not copy it into `~\.claude\skills`;
-that shadows the live version. Check sync with:
-
-```
-python path/to/your/skill-tools/sync_skills.py
-```
+The `transparent-gif-loop` skill derives from this project. If you change behaviour here,
+the copy installed into your agent's skills directory can go stale — reinstall it after a
+change rather than editing the installed copy, which is a read-only cache.
 
 ## Rails
 
 Standard: task branch, no direct commits to `main`, no push without approval, no secrets.
-Generic rails come from `Projects\AGENTS.md`.
 
