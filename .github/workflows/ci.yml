@@ -1,0 +1,25 @@
+name: CI
+
+# SKILL.md asks for the smoke test after script edits. Now it runs on every one.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Pillow
+        run: python -m pip install --quiet Pillow
+      - name: Smoke test (still + animated WebP on a tiny fixture)
+        run: python scripts/smoke_test.py
+      - name: CLI answers --help
+        run: python scripts/process_gif.py --help > /dev/null
