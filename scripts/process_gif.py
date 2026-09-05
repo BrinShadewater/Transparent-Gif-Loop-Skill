@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 try:
-    from PIL import Image, ImageOps, ImageSequence
+    from PIL import Image, ImageChops, ImageOps, ImageSequence
 except ModuleNotFoundError as exc:  # pragma: no cover - runtime dependency message
     raise SystemExit("Pillow is required. Install it with: python -m pip install Pillow") from exc
 
@@ -75,8 +75,8 @@ def parse_args() -> argparse.Namespace:
     animated.add_argument(
         "--method",
         type=int,
-        default=0,
-        help="Animated WebP encoding effort from 0-6.",
+        default=4,
+        help="Animated WebP encoding effort from 0-6 (libwebp's own default is 4; 0 is fastest and largest).",
     )
 
     still = subparsers.add_parser("still", parents=[common], help="Extract a single transparent WebP still")
@@ -91,11 +91,15 @@ def parse_args() -> argparse.Namespace:
 
 
 def matte_to_alpha(frame: Image.Image, size: int, threshold: int) -> Image.Image:
+    """Knock out the black matte, keeping any transparency the source already had."""
     rgba = frame.convert("RGBA")
     rgba.thumbnail((size, size), Image.Resampling.LANCZOS)
+    existing = rgba.getchannel("A")
     gray = ImageOps.grayscale(rgba.convert("RGB"))
-    alpha = gray.point(lambda px: 0 if px <= threshold else 255, "L")
-    rgba.putalpha(alpha)
+    matte = gray.point(lambda px: 0 if px <= threshold else 255, "L")
+    # Both masks are 0/255, so multiply is an AND: transparent stays transparent,
+    # matte-black becomes transparent, everything else keeps its source alpha.
+    rgba.putalpha(ImageChops.multiply(existing, matte))
     return rgba
 
 
@@ -144,18 +148,27 @@ def build_animation(
     output_frames: list[Image.Image] = []
     output_durations: list[int] = []
 
+    intended_total = 0
     for index, frame in enumerate(frames):
+        is_last = index == len(frames) - 1
         next_frame = frames[(index + 1) % len(frames)]
         scaled_duration = max(20, int(round(durations[index] * speed_scale)))
+        intended_total += scaled_duration
 
-        if midpoint_frames <= 0:
+        # With a bridge, the seam is the bridge's job: interpolating the last frame
+        # toward frame 0 here and then bridging from the last frame again made the
+        # loop walk halfway home and jump back.
+        if midpoint_frames <= 0 or (is_last and bridge_frames > 0):
             output_frames.append(frame)
             output_durations.append(scaled_duration)
             continue
 
-        base_share = max(18, int(round(scaled_duration * 0.58)))
-        midpoint_total = max(midpoint_frames * 18, scaled_duration - base_share)
-        midpoint_share = max(18, int(round(midpoint_total / midpoint_frames)))
+        # The source frame keeps ~58% of its time; the midpoints share the rest. The
+        # 18 ms floor is a decoder sanity limit, and when it binds the base frame gives
+        # the time up, so a frame's total only grows when both floors bind.
+        base_share = int(round(scaled_duration * 0.58))
+        midpoint_share = max(18, int(round((scaled_duration - base_share) / midpoint_frames)))
+        base_share = max(18, scaled_duration - midpoint_frames * midpoint_share)
 
         output_frames.append(frame)
         output_durations.append(base_share)
@@ -165,6 +178,14 @@ def build_animation(
             midpoint = Image.blend(frame, next_frame, blend_amount)
             output_frames.append(midpoint)
             output_durations.append(midpoint_share)
+
+    stretched = sum(output_durations) - intended_total
+    if stretched > 0:
+        print(
+            f"note: the 18 ms per-frame floor stretched playback by {stretched} ms "
+            f"({stretched / intended_total:.0%}); use fewer --midpoint-frames or a larger --speed-scale.",
+            file=sys.stderr,
+        )
 
     last = frames[-1]
     first = frames[0]
